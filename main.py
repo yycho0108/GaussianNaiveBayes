@@ -1,5 +1,6 @@
 import numpy as np
 import csv
+from matplotlib import pyplot as plt
 
 def argmax(args,f):
     maxArg = None
@@ -28,7 +29,7 @@ class GNB: #Gaussian Naive Bayes
         self.summary = {}
 
     def Prob(self,x,m,d):
-        return 1.0 / np.sqrt(2*np.pi) * np.exp(-(x-m)**2/(2*d**2))
+        return 1.0 / (d * np.sqrt(2*np.pi)) * np.exp(-(x-m)**2/(2*d**2))
 
     def fit(self,xs,ys):
         self.num_features = len(xs)
@@ -50,9 +51,9 @@ class GNB: #Gaussian Naive Bayes
             self.summary[lab] = [[] for _ in range(len(fs))]
             for fi, f in enumerate(fs): #feature
                 self.summary[lab][fi] = SMR(f)
-        print self.summary
+        #print self.summary
 
-    def predict(self,xs):
+    def predict_one(self,xs):
         maxP = 0.0
         maxY = None
         totP = 0.0
@@ -65,6 +66,13 @@ class GNB: #Gaussian Naive Bayes
                 maxY = y
             totP += p
         return maxY,(maxP/totP)
+    def predict(self,xs):
+        y_pred = []
+        for x in xs:#t = target
+            y,p = self.predict_one(x)
+            y_pred += [y]
+        return y_pred
+
 
 def readData(fileName):
     lines = csv.reader(open(fileName,"rb"))
@@ -81,22 +89,33 @@ def splitData(dataset,pivot):
     y_test = ys[pivot:]
     return x_train,y_train,x_test,y_test
 
+def accuracy_score(ys,ts):
+    correct = 0
+    for y,t in zip(ys,ts):
+        if y == t:
+            correct += 1
+    return float(correct) / len(ys)
+
 def main():
     dataset = readData("pima-indians-diabetes.data.csv")
-    x_train,y_train,x_test,y_test = splitData(dataset,0.67)
+    scores = []
+    num_iter = 100
+    for i in range(num_iter):
+        x_train,y_train,x_test,y_test = splitData(dataset,0.67)
 
-    gnb = GNB()
-    gnb.fit(x_train,y_train)
+        gnb = GNB()
+        gnb.fit(x_train,y_train)
 
-    correct = 0
+        y_pred = gnb.predict(x_test)
+        score = accuracy_score(y_pred,y_test)
 
-    for x,t in zip(x_test,y_test):#t = target
-        y,p = gnb.predict(x)
-        if y==t:
-            correct += 1
-        print "Y : {}, T : {}, P : {:2.2f}".format(y,t,p)
+        #print "ACCURACY : {:2.2f}%".format(score * 100)
+        scores += [score]
+    plt.plot(scores)
+    plt.title("Accuracy over {} iterations".format(num_iter))
+    plt.show()
 
-    print "ACCURACY : {:2.2f}%".format(correct * 100.0/len(y_test))
+
 
 if __name__ == "__main__":
     main()

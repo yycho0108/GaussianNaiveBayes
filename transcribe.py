@@ -96,6 +96,6 @@ def main():
 	# test model
 	predictions = getPredictions(summaries, testSet)
 	accuracy = getAccuracy(testSet, predictions)
-	print('Accuracy: {0}%').format(accuracy)
+        print('Accuracy: {:2.2f}%').format(accuracy)
  
 main()
