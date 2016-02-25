@@ -2,7 +2,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
 import numpy as np
 import csv
-
+from matplotlib import pyplot as plt
 def readData(fileName):
     lines = csv.reader(open(fileName,"rb"))
     return list(lines) 
@@ -22,10 +22,20 @@ def main():
     clf = GaussianNB()
     dataset = readData("pima-indians-diabetes.data.csv")
     pivot = 0.67
-    x_train,y_train,x_test,y_test = splitData(dataset,pivot)
-    clf.fit(x_train,y_train)
-    y_pred = clf.predict(x_test)
-    print "ACCURACY : {:2.2f}%".format(100.0 * accuracy_score(y_test,y_pred))
+    scores = []
+    num_iter = 100
+    for i in range(num_iter):
+        x_train,y_train,x_test,y_test = splitData(dataset,pivot)
+        clf.fit(x_train,y_train)
+        y_pred = clf.predict(x_test)
+        score = accuracy_score(y_test,y_pred)
+        print "ACCURACY : {:2.2f}%".format(100.0 * score)
+        scores += [score]
+
+    plt.plot(scores)
+    plt.title("Accuracy over {} iterations".format(num_iter))
+    plt.show()
+
 
 
 if __name__ == "__main__":

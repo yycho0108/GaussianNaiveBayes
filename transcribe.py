@@ -1,7 +1,7 @@
 import csv
 import random
 import math
- 
+from matplotlib import pyplot as plt 
 def loadCsv(filename):
 	lines = csv.reader(open(filename, "rb"))
 	dataset = list(lines)
@@ -82,20 +82,31 @@ def getAccuracy(testSet, predictions):
 	for i in range(len(testSet)):
 		if testSet[i][-1] == predictions[i]:
 			correct += 1
-	return (correct/float(len(testSet))) * 100.0
+	return (correct/float(len(testSet)))
  
 def main():
 	filename = 'pima-indians-diabetes.data.csv'
         #filename = 'record/data.csv'
 	splitRatio = 0.67
 	dataset = loadCsv(filename)
-	trainingSet, testSet = splitDataset(dataset, splitRatio)
-	print('Split {0} rows into train={1} and test={2} rows').format(len(dataset), len(trainingSet), len(testSet))
-	# prepare model
-	summaries = summarizeByClass(trainingSet)
-	# test model
-	predictions = getPredictions(summaries, testSet)
-	accuracy = getAccuracy(testSet, predictions)
-        print('Accuracy: {:2.2f}%').format(accuracy)
+        
+        scores = []
+        num_iter = 100
+
+        for i in range(num_iter):
+            trainingSet, testSet = splitDataset(dataset, splitRatio)
+            print('Split {0} rows into train={1} and test={2} rows').format(len(dataset), len(trainingSet), len(testSet))
+            # prepare model
+            summaries = summarizeByClass(trainingSet)
+            # test model
+            predictions = getPredictions(summaries, testSet)
+            accuracy = getAccuracy(testSet, predictions)
+            print('Accuracy: {:2.2f}%').format(accuracy)
+            scores += [accuracy]
+
+        plt.plot(scores)
+        plt.title('Accuracy over {} iterations'.format(num_iter))
+        plt.show()
+
  
 main()
