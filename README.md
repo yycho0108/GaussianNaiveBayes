@@ -11,3 +11,5 @@ Following [An Example by Jason Brownlee](http://machinelearningmastery.com/naive
 
 ###SKLearn GaussianNB
 ![SKLearn](images/sklearn.png)
+
+As seen, the performances of the three methods all reside within 70~80%.
