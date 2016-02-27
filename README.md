@@ -3,6 +3,10 @@ Following [An Example by Jason Brownlee](http://machinelearningmastery.com/naive
 
 ##Verification:
 
+###Gaussian Distribution
+![Gaussian](images/Gaussian.png)
+Gaussian Distribution of probabilities of each features.
+
 ###Custom Implementation
 ![Custom Implementation](images/main.png)
 

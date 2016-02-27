@@ -2,15 +2,8 @@ import numpy as np
 import csv
 from matplotlib import pyplot as plt
 
-def argmax(args,f):
-    maxArg = None
-    maxVal = 0
-    for arg in args:
-        val = f(*arg)
-        if val > maxVal:
-            maxVal = val
-            maxArg = arg
-    return maxArg
+def Gaussian(x,m,s):#mu = mean, sigma = stddev
+    return 1.0/(s*np.sqrt(2*np.pi))*np.exp(-0.5*((x-m)/s)**2)
 
 class SMR: #Summary Struct
     def __init__(self,f):
@@ -32,7 +25,7 @@ class GNB: #Gaussian Naive Bayes
         return 1.0 / (d * np.sqrt(2*np.pi)) * np.exp(-(x-m)**2/(2*d**2))
 
     def fit(self,xs,ys):
-        self.num_features = len(xs)
+        self.num_features = len(xs[0])
         #classify by labels
         for x,y in zip(xs,ys):
             #print(y)
@@ -47,10 +40,10 @@ class GNB: #Gaussian Naive Bayes
     def summarize(self):
         self.summary = {} #[[] for _ in range(len(self.dat))]
         for lab,insts in self.dat.items(): #label, instances
-            fs = zip(*insts) #features
-            self.summary[lab] = [[] for _ in range(len(fs))]
-            for fi, f in enumerate(fs): #feature
-                self.summary[lab][fi] = SMR(f)
+            f = zip(*insts) #features
+            self.summary[lab] = [[] for _ in range(self.num_features)]
+            for i in range(self.num_features): #feature
+                    self.summary[lab][i] = SMR(f[i])
         #print self.summary
 
     def predict_one(self,xs):
@@ -59,8 +52,8 @@ class GNB: #Gaussian Naive Bayes
         totP = 0.0
         for y, s in self.summary.items():
             p = 1.0
-            for i,x in enumerate(xs):
-                p *= self.Prob(x,s[i].mean,s[i].stddev)
+            for i in range(self.num_features):
+                p *= self.Prob(xs[i],s[i].mean,s[i].stddev)
             if p > maxP:
                 maxP = p
                 maxY = y
@@ -72,7 +65,17 @@ class GNB: #Gaussian Naive Bayes
             y,p = self.predict_one(x)
             y_pred += [y]
         return y_pred
-
+    def visualize(self):
+        x = np.linspace(-1,1)
+        for y,ss in self.summary.items():
+            print(len(ss))
+            print(self.num_features)
+            for s in ss:
+                y = Gaussian(x,s.mean,s.stddev)
+                plt.plot(x,y)
+        ax = plt.gca()
+        plt.title("Gaussian Distributions of features")
+        plt.show()
 
 def readData(fileName):
     lines = csv.reader(open(fileName,"rb"))
@@ -115,7 +118,21 @@ def main():
     plt.title("Accuracy over {} iterations".format(num_iter))
     plt.show()
 
+def test():
+    x = np.linspace(0,1)
+    y = Gaussian(x,0.5,0.2)
+    plt.plot(x,y)
+    plt.title("GAUSSIAN TEST")
+    plt.show()
 
+def test_2():
+    dataset = readData("pima-indians-diabetes.data.csv")
+    x_train,y_train,x_test,y_test = splitData(dataset,0.67)
+    gnb = GNB()
+    gnb.fit(x_train,y_train)
+    gnb.visualize()
 
 if __name__ == "__main__":
-    main()
+    #main()
+    #test()
+    test_2()
